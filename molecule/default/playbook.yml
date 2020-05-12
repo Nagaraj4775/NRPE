@@ -1,0 +1,12 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: ansible-role-nrpe-client
+
+  post_tasks:
+    - name: Test with check_nrpe
+      command: /usr/local/nagios/libexec/check_nrpe -H 127.0.0.1
+      failed_when: nrpe_version not in nrpe_test.stdout
+      changed_when: false
+      register: nrpe_test

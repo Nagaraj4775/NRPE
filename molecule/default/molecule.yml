@@ -1,0 +1,54 @@
+---
+dependency:
+  name: galaxy
+  options:
+    role-file: requirements.yml
+
+driver:
+  name: docker
+
+lint:
+  name: yamllint
+  options:
+    config-file: ${DEV_MOLECULE_RULES}/yaml-lint.yml
+
+platforms:
+  - name: NRPE-Client-CentOS7
+    image: lansible/centos:7
+
+#  - name: NRPE-Client-CentOS6
+#    image: lansible/centos:6
+
+  - name: NRPE-Client-Debian9
+    image: lansible/debian:9
+
+  - name: NRPE-Client-Debian8
+    image: lansible/debian:8
+
+#  - name: NRPE-Client-Fedora27
+#    image: lansible/fedora:27
+#
+#  - name: NRPE-Client-Fedora26
+#    image: lansible/fedora:26
+#
+#  - name: NRPE-Client-Fedora25
+#    image: lansible/fedora:25
+
+  - name: NRPE-Client-Ubuntu1604
+    image: lansible/ubuntu:16.04
+
+#  - name: NRPE-Client-Ubuntu1404
+#    image: lansible/ubuntu:14.04
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      callback_whitelist: profile_tasks
+  lint:
+    name: ansible-lint
+    options:
+      c: ${DEV_MOLECULE_RULES}/ansible-lint.yml
+
+scenario:
+  name: default

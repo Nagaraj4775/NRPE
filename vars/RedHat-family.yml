@@ -1,0 +1,14 @@
+---
+apache: httpd
+apacheuser: apache
+
+nrpe_prerequisites:
+  - gcc
+  - glibc
+  - glibc-common
+  - openssl
+  - openssl-devel
+  - perl
+  - make
+
+nrpe_init: /usr/lib/systemd/system/nrpe.service  # Systemd
