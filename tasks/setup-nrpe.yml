@@ -1,13 +1,33 @@
 ---
 
+- name: adding templates to target directories
+  template:
+    src:    "{{ item.src }}.j2"
+    dest:   "{{ item.dest }}"
+    force:  yes
+    owner:  "{{ item.owner }}"
+    group:  "{{ item.group }}"
+    mode:   '0644'
+    seuser: system_u
+    serole: object_r
+    setype: nrpe_etc_t
+  with_items:
+   - { src: 'nrpe.cfg',  dest: "{{ nrpe_etc_path }}/nrpe.cfg", owner: "{{ nrpe_user }}", group: "{{ nrpe_group }}" }
+   - { src: 'basic_commands.cfg', dest: "{{ nrpe_etc_path }}/basic.cfg",  owner: "{{ nrpe_user }}", group: "{{ nrpe_group }}" }
+  notify:
+   - Reload NRPE
+  tags: nrpe
+
 - name: Set allowed_hosts in nrpe.cfg
   lineinfile:
-    dest: /usr/local/nagios/etc/nrpe.cfg
+    dest: "{{ nrpe_etc_path }}/nrpe.cfg"
     regexp: '^allowed_hosts='
     line: "allowed_hosts={% for host in nrpe_allowed_hosts %}{{ host }}{% if not loop.last %},{% endif %}{% endfor %}"
 
 - name: Set dont_blame in nrpe.cfg
   lineinfile:
-    dest: /usr/local/nagios/etc/nrpe.cfg
+    dest: "{{ nrpe_etc_path }}/nrpe.cfg"
     regexp: '^dont_blame='
     line: "dont_blame={{ nrpe_dont_blame_nrpe }}"
+  notify: restart nrpe  
+
