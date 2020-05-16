@@ -1,11 +1,11 @@
 ---
 
-- name: Create nagios group
+- name: Create NRPE group
   group:
     name: "{{ nrpe_group }}"
     state: present
 
-- name: Create nagios user
+- name: Create NRPE user
   user:
     name: "{{ nrpe_user }}"
     groups: "{{ nrpe_group }}"

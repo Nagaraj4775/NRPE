@@ -1,0 +1,143 @@
+
+# The following examples use hardcoded command arguments...
+# This is by far the most secure method of using NRPE
+
+#command[check_users]=/usr/local/nagios/libexec/check_users -w 5 -c 10
+#command[check_load]=/usr/local/nagios/libexec/check_load -r -w .15,.10,.05 -c .30,.25,.20
+#command[check_hda1]=/usr/local/nagios/libexec/check_disk -w 20% -c 10% -p /dev/hda1
+
+#command[check_docker]=/usr/local/nagios/libexec/check_docker.py $ARG1$
+#command[check_docker2]=sudo python3 /usr/local/nagios/libexec/check_docker.py $ARG1$
+
+
+### MISC SYSTEM METRICS ###
+#command[check_users]=/usr/local/nagios/libexec/check_users $ARG1$
+#command[check_load]=/usr/local/nagios/libexec/check_load $ARG1$
+#command[check_disk]=/usr/local/nagios/libexec/check_disk $ARG1$
+
+# {{ ansible_managed }}
+
+#
+# CPU Load
+#
+# Warning:  {{ ansible_processor_count * nrpe_monitor_cpuload.warning[0] * 100.0 }}% < 1min, {{ ansible_processor_count * nrpe_monitor_cpuload.warning[1] * 100.0 }}% < 5min, {{ ansible_processor_count * nrpe_monitor_cpuload.warning[2] * 100.0 }}% < 15min
+# Critical: {{ ansible_processor_count * nrpe_monitor_cpuload.critical[0] * 100.0 }}% < 1min, {{ ansible_processor_count * nrpe_monitor_cpuload.critical[1] * 100.0 }}% < 5min, {{ ansible_processor_count * nrpe_monitor_cpuload.critical[2] * 100.0 }}% < 15min
+#
+command[check_load]={{ nrpe_nagios_path }}/check_load -w {{ ansible_processor_count * nrpe_monitor_cpuload.warning[0] }},{{ ansible_processor_count * nrpe_monitor_cpuload.warning[1] }},{{ ansible_processor_count * nrpe_monitor_cpuload.warning[2] }} -c {{ ansible_processor_count * nrpe_monitor_cpuload.critical[0] }},{{ ansible_processor_count * nrpe_monitor_cpuload.critical[1] }},{{ ansible_processor_count * nrpe_monitor_cpuload.critical[2] }}
+
+#
+# Memory Usage
+#
+# Warning:  {{ nrpe_monitor_freemem.warning }}% Free Memory, buffer
+# Critical: {{ nrpe_monitor_freemem.critical }}% Free Memory
+#
+command[check_memory]={{ nrpe_nagios_path }}/check_mem.pl -w {{ nrpe_monitor_freemem.warning }} -c {{ nrpe_monitor_freemem.critical }} -f -C
+
+{% if nrpe_monitor_ntp.servers != [] %}
+#
+# NTP Time
+#
+# Warning:  {{ nrpe_monitor_ntp.warning }} sec
+# Critical: {{ nrpe_monitor_ntp.critical }} sec
+#
+command[check_ntp]={{ nrpe_nagios_path }}/check_ntp {% for ntp in nrpe_monitor_ntp.servers %}-H {{ ntp }} {% endfor %}-w {{ nrpe_monitor_ntp.warning }} -c {{ nrpe_monitor_ntp.critical }}
+
+{% endif %}
+#
+# Zombie Processes
+#
+# Warning:  {{ nrpe_monitor_zombies.warning }} Zombie
+# Critical: {{ nrpe_monitor_zombies.critical }} Zombies
+#
+command[check_zombie_procs]={{ nrpe_nagios_path }}/check_procs -w {{ nrpe_monitor_zombies.warning }} -c {{ nrpe_monitor_zombies.critical }} -s Z
+
+{% if nrpe_monitor_internal_dns.host != '' %}
+#
+# DNS Service for internal hosts
+#
+# Host checked: {{ nrpe_monitor_internal_dns.host }}
+# Warning:  {{ nrpe_monitor_internal_dns.warning }} Second(s)
+# Critical: {{ nrpe_monitor_internal_dns.critical }} Second(s)
+# Timeout: {{ nrpe_monitor_internal_dns.timeout }} Second(s)
+#
+command[check_dns_internal]={{ nrpe_nagios_path }}/check_dns -H {{ nrpe_monitor_internal_dns.host }} -w {{ nrpe_monitor_internal_dns.warning }} -c {{ nrpe_monitor_internal_dns.critical }} -t {{ nrpe_monitor_internal_dns.timeout | int }}
+
+{% endif %}
+{% if nrpe_monitor_external_dns.host != '' %}
+#
+# DNS Service for external hosts
+#
+# Host checked: {{ nrpe_monitor_external_dns.host }}
+# Warning:  {{ nrpe_monitor_external_dns.warning }} Second(s)
+# Critical: {{ nrpe_monitor_external_dns.critical }} Second(s)
+# Timeout: {{ nrpe_monitor_external_dns.timeout }} Second(s)
+#
+command[check_dns_external]={{ nrpe_nagios_path }}/check_dns -H {{ nrpe_monitor_external_dns.host }} -w {{ nrpe_monitor_external_dns.warning }} -c {{ nrpe_monitor_external_dns.critical }} -t {{ nrpe_monitor_external_dns.timeout | int }}
+
+{% endif %}
+#
+# Syslog Service
+#
+# Critical: 1 Process always present
+#
+command[check_syslog]={{ nrpe_nagios_path }}/check_procs -C {{ nrpe_monitor_syslog.process }} -c '1:1'
+
+#
+# Open TTY sessions
+#
+# Warning: >= 1
+#
+command[check_open_tty]={{ nrpe_nagios_path }}/check_open_tty -w 1
+
+#
+# Swap
+#
+# Warning:  < {{ nrpe_monitor_freeswap.warning * 100 }}% Free Space
+# Critical: < {{ nrpe_monitor_freeswap.critical * 100 }}% Free Space
+#
+command[check_partition_swap]={{ nrpe_nagios_path }}/check_swap -w {{ nrpe_monitor_freeswap.warning * 100 }}% -c {{ nrpe_monitor_freeswap.critical * 100 }}% -a
+
+#
+# Partition /
+#
+# Warning:  < {{ nrpe_monitor_freeroot.warning * 100 }}% Free Space
+# Critical: < {{ nrpe_monitor_freeroot.critical * 100 }}% Free Space
+#
+command[check_partition_]={{ nrpe_nagios_path }}/check_disk -w {{ nrpe_monitor_freeroot.warning * 100 }}% -c {{ nrpe_monitor_freeroot.critical * 100 }}% -p /
+
+#
+# Partition /boot
+#
+# Warning:  < {{ nrpe_monitor_freeboot.warning * 100 }}% Free Space
+# Critical: < {{ nrpe_monitor_freeboot.critical * 100 }}% Free Space
+#
+command[check_partition_boot]={{ nrpe_nagios_path }}/check_disk -w {{ nrpe_monitor_freeboot.warning * 100 }}% -c {{ nrpe_monitor_freeboot.critical * 100 }}% -p /boot
+
+#
+# Partition /var/log
+#
+# Warning:  < {{ nrpe_monitor_freevarlog.warning * 100 }}% Free Space
+# Critical: < {{ nrpe_monitor_freevarlog.critical * 100 }}% Free Space
+#
+command[check_partition_var_log]={{ nrpe_nagios_path }}/check_disk -w {{ nrpe_monitor_freevarlog.warning * 100 }}% -c {{ nrpe_monitor_freevarlog.critical * 100 }}% -p /var/log
+{% for item in ansible_mounts if not item.mount in ["/", "/boot", "/var/log"] and item.fstype in local_fs %}
+
+#
+# Partition {{ item.mount }}
+#
+# Warning:  < {{ nrpe_monitor_freeother.warning * 100 }}% Free Space
+# Critical: < {{ nrpe_monitor_freeother.critical * 100 }}% Free Space
+#
+command[check_partition{{ item.mount | replace( "/", "_" ) }}]={{ nrpe_nagios_path }}/check_disk -w {{ nrpe_monitor_freeother.warning * 100 }}% -c {{ nrpe_monitor_freeother.critical * 100 }}% -p {{ item.mount }}
+{% endfor %}
+{% for item in ansible_mounts if item.fstype not in local_fs %}
+
+#
+# Remote Mount Point {{ item.mount }} Check
+#
+command[check_remote_mount{{ item.mount | replace( "/", "_" ) }}]={{ nrpe_nagios_path }}/check_remote_mount {{ item.mount }} '.'
+{% endfor %}
+
+
+
+

@@ -1,8 +1,7 @@
 ---
 
 # Sets the hosts allowed to connect to NRPE
-nrpe_allowed_hosts:
-  - 127.0.0.1
+
 
 # The directory where the downloaded files will be placed and extracted.
 download_dir: "{{ ansible_env.HOME }}/nrpe"
@@ -16,11 +15,165 @@ nrpeurl: "https://github.com/NagiosEnterprises/nrpe/archive/nrpe-{{ nrpe_version
 # The name of the untarred NRPE directory
 nrpesrc: "nrpe-nrpe-{{ nrpe_version }}"
 
-# The user which the NRPE daemon runs as
-nrpe_user: nagios
-
-# The group which the NRPE daemon runs as
-nrpe_group: nagios
-
 # Determines if the NRPE daemon will allow clients to specify arguments to commands that are executed. Change to 1 to enable
-nrpe_dont_blame_nrpe: 0
+
+nrpe_user: 'nagios'
+nrpe_group: 'nagios'
+nrpe_dont_blame:    '0'
+nrpe_allowed_hosts: "127.0.0.1,10.0.2.3"
+
+#
+# General Variables
+#
+
+# Enable NRPE to accept incoming requests
+nagios_nrpe_enabled: false
+
+# List of Nagios servers
+nagios_servers: []
+
+# List the services to include when assigning groups to the host
+nagios_group_services: "{{ services }}"
+
+# User and group running Nagios on the server
+nagios_server_user: nagios
+nagios_server_group: nagios
+
+# Nagios directories shortcuts
+nagios_home_path:     /usr/local/nagios
+nagios_etc_path:      "{{ nagios_home_path }}/etc"
+nagios_objects_path:  "{{ nagios_etc_path }}/objects"
+nagios_host_path:     "{{ nagios_objects_path }}/hosts/{{ ansible_hostname }}"
+nagios_services_path: "{{ nagios_objects_path }}/services"
+nagios_groups_path:   "{{ nagios_objects_path }}/groups"
+
+# nrpe directories
+
+nrpe_etc_path: "/usr/local/nagios/etc"
+nrpe_nagios_path: "{{ nagios_home_path }}/libexec"
+#
+# Additional components
+#
+nrpe_postgres_enabled: false
+
+
+#
+# Nagios Objects Defaults
+#
+
+# Default configuration for services
+nagios_host_defaults: {}
+
+# Default configuration for services
+nagios_service_defaults: {}
+
+# Default configuration for the basic system checks
+nagios_service_basics_defaults: {}
+
+# Default configuration for dependecies
+nagios_dependency_defaults:
+  execution_failure_criteria:    'n'
+  notification_failure_criteria: 'c,w,u'
+
+
+#
+# Nagios Actions Defaults
+#
+
+# If true it enables the action_url for hosts and services
+nagios_actions_enabled: false
+
+# The URL for the actions_url to assign to the checks
+nagios_actions:
+  host_dashboard: ''
+  ping_dashboard: ''
+  cpuload_dashboard: ''
+  freemem_dashboard: ''
+  ntp_dashboard: ''
+  zombies_dashboard: ''
+  tty_dashboard: ''
+  syslog_dashboard: ''
+  freeswap_dashboard: ''
+  freeroot_dashboard: ''
+  freeboot_dashboard: ''
+  freevarlog_dashboard: ''
+  freeother_dashboard: ''
+  internal_dns_dashboard: ''
+  external_dns_dashboard: ''
+  local_mounts_dashboard: ''
+  remote_mounts_dashboard: ''
+
+
+#
+# NRPE Thresholds and parameters for monitoring
+#
+
+nrpe_monitor_ping:
+  rtt_warning:   100.0
+  rtt_critical:  300.0
+  lost_warning:  0.05
+  lost_critical: 0.1
+  service:
+    check_interval:           2
+    retry_interval:           1
+    notification_interval:    15
+    first_notification_delay: 5
+    notification_options:     c,w
+
+nrpe_monitor_cpuload:
+  warning:  [ 3.0, 2.0, 1.0 ]
+  critical: [ 6.0, 2.5, 1.5 ]
+
+nrpe_monitor_freemem:
+  warning:  10.0
+  critical: 5.0
+
+nrpe_monitor_ntp:
+  servers: "{{ ntp_servers | default([]) |  map(attribute='name') | list }}"
+  warning:  2.0
+  critical: 5.0
+
+nrpe_monitor_zombies:
+  warning:  1
+  critical: 5
+
+nrpe_monitor_tty: {}
+
+nrpe_monitor_internal_dns:
+  host:     www.amazon.com
+  timeout:  5.0
+  warning:  2.5
+  critical: 5.0
+
+nrpe_monitor_external_dns:
+  host:     www.amazon.com
+  timeout:  5.0
+  warning:  2.5
+  critical: 5.0
+
+nrpe_monitor_syslog:
+  process: rsyslogd
+
+nrpe_monitor_local_mounts: {}
+
+nrpe_monitor_freeswap:
+  warning:  0.4
+  critical: 0.2
+
+nrpe_monitor_freeroot:
+  warning:  0.2
+  critical: 0.1
+
+nrpe_monitor_freeboot:
+  warning:  0.1
+  critical: 0.05
+
+nrpe_monitor_freevarlog:
+  warning:  0.2
+  critical: 0.05
+
+nrpe_monitor_freeother:
+  warning:  0.2
+  critical: 0.1
+
+nrpe_monitor_remote_mounts: {}
