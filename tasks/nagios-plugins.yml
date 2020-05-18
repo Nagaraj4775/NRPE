@@ -5,12 +5,16 @@
     path: "{{ download_dir }}"
     state: directory
 
-- name: Download Nagios Plugins
-  command: wget -O "{{ download_dir }}/nagios-plugins-release-{{ nagios_plugins_version }}.tar.gz" "https://nagios-plugins.org/download/nagios-plugins-{{ nagios_plugins_version }}.tar.gz"
+#- name: Download Nagios Plugins
+#  command: wget -O "{{ download_dir }}/nagios-plugins-release-{{ nagios_plugins_version }}.tar.gz" "https://nagios-plugins.org/download/nagios-plugins-{{ nagios_plugins_version }}.tar.gz"
+- name: Get NRPE
+  get_url:
+    url: "{{ pluginsurl }}"
+    dest: "{{ download_dir }}/nagios-plugins-{{ nagios_plugins_version }}.tar.gz"
 
 - name: Unpack Nagios plugin source
   unarchive:
-    src: "{{ download_dir }}/nagios-plugins-release-{{ nagios_plugins_version }}.tar.gz"
+    src: "{{ download_dir }}/nagios-plugins-{{ nagios_plugins_version }}.tar.gz"
     dest: "{{ download_dir }}/"
     remote_src: true
 

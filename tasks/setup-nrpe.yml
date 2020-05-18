@@ -27,6 +27,7 @@
     seuser: system_u
     serole: object_r
     setype: nagios_unconfined_plugin_exec_t
+  notify: restart nrpe 
   tags: nrpe
 
 - name: Set allowed_hosts in nrpe.cfg

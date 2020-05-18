@@ -12,7 +12,7 @@ nagios_plugins_version: 2.2.1
 
 # The NRPE download url
 nrpeurl: "https://github.com/NagiosEnterprises/nrpe/archive/nrpe-{{ nrpe_version }}.tar.gz"
-
+pluginsurl: https://github.com/nagios-plugins/nagios-plugins/releases/download/release-{{ nagios_plugins_version }}/nagios-plugins-{{ nagios_plugins_version }}.tar.gz
 # The name of the untarred NRPE directory
 nrpesrc: "nrpe-nrpe-{{ nrpe_version }}"
 
@@ -21,8 +21,9 @@ nrpesrc: "nrpe-nrpe-{{ nrpe_version }}"
 nrpe_user: 'nagios'
 nrpe_group: 'nagios'
 nrpe_dont_blame:    '0'
-nrpe_allowed_hosts: "{{ (nagios_servers | map(attribute='address') | list + ['127.0.0.1']) | join(',') }}"
-
+nrpe_allowed_hosts: 
+  - 127.0.0.1
+  - 10.28.128.50
 #
 # General Variables
 #
