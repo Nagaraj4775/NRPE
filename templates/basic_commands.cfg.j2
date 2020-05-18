@@ -52,30 +52,6 @@ command[check_ntp]={{ nrpe_nagios_path }}/check_ntp {% for ntp in nrpe_monitor_n
 #
 command[check_zombie_procs]={{ nrpe_nagios_path }}/check_procs -w {{ nrpe_monitor_zombies.warning }} -c {{ nrpe_monitor_zombies.critical }} -s Z
 
-{% if nrpe_monitor_internal_dns.host != '' %}
-#
-# DNS Service for internal hosts
-#
-# Host checked: {{ nrpe_monitor_internal_dns.host }}
-# Warning:  {{ nrpe_monitor_internal_dns.warning }} Second(s)
-# Critical: {{ nrpe_monitor_internal_dns.critical }} Second(s)
-# Timeout: {{ nrpe_monitor_internal_dns.timeout }} Second(s)
-#
-command[check_dns_internal]={{ nrpe_nagios_path }}/check_dns -H {{ nrpe_monitor_internal_dns.host }} -w {{ nrpe_monitor_internal_dns.warning }} -c {{ nrpe_monitor_internal_dns.critical }} -t {{ nrpe_monitor_internal_dns.timeout | int }}
-
-{% endif %}
-{% if nrpe_monitor_external_dns.host != '' %}
-#
-# DNS Service for external hosts
-#
-# Host checked: {{ nrpe_monitor_external_dns.host }}
-# Warning:  {{ nrpe_monitor_external_dns.warning }} Second(s)
-# Critical: {{ nrpe_monitor_external_dns.critical }} Second(s)
-# Timeout: {{ nrpe_monitor_external_dns.timeout }} Second(s)
-#
-command[check_dns_external]={{ nrpe_nagios_path }}/check_dns -H {{ nrpe_monitor_external_dns.host }} -w {{ nrpe_monitor_external_dns.warning }} -c {{ nrpe_monitor_external_dns.critical }} -t {{ nrpe_monitor_external_dns.timeout | int }}
-
-{% endif %}
 #
 # Syslog Service
 #

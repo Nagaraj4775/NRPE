@@ -1,12 +1,14 @@
 ---
 # tasks file for nagios
 
-#- include: load-variables.yml
+- include: load-variables.yml
 
-#- include: setup-prerequisites.yml
+- include: setup-prerequisites.yml
 
-#- include: setup-users.yml
+- include: setup-users.yml
 
-#- include: build-nrpe.yml
+- include: build-nrpe.yml
+
+- include: nagios-plugins.yml
 
 - include: setup-nrpe.yml
