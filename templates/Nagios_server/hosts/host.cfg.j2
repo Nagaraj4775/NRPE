@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+
+#
+# Host definition for {{ ansible_hostname }}
+#
+define host {
+    use                             host-{{ ansible_hostname }}
+    host_name                       {{ ansible_hostname }}
+    alias                           {{ ansible_hostname }}
+    address                         {{ ansible_default_ipv4.address }}
+{% if nagios_actions_enabled | bool and nagios_actions.host_dashboard | default('') != '' %}
+    action_url                      {{ nagios_actions.host_dashboard }}
+{% endif %}
+    icon_image                      linux40.png
+}

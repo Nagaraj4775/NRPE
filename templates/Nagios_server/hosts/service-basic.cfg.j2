@@ -1,0 +1,204 @@
+{#
+Custome parameters for objects
+#}
+{% macro nagios_extra(configuration) -%}
+{% for parameter, value in configuration.iteritems() %}
+    {{ parameter.ljust(31) }} {{ value }}
+{% endfor %}
+{%- endmacro %}
+{#
+Service and service dependency definitions. Only one dependency per service is allowed
+#}
+{% macro service_definition(description, depends_on, check_command, section, dashboard) -%}
+define service {
+    use                             service-basic-{{ ansible_hostname }}
+    host_name                       {{ ansible_hostname }}
+    service_description             {{ description }}
+    check_command                   check_nrpe!{{ check_command }}
+{% if nagios_actions_enabled | bool and dashboard != '' %}
+    action_url                      {{ dashboard }}
+{% endif %}
+{{ nagios_extra(section.get('service', {})) }}
+}
+{% if depends_on != '' %}
+define servicedependency {
+    use                             servicedependency-{{ ansible_hostname }}
+    dependent_host_name             {{ ansible_hostname }}
+    dependent_service_description   {{ description }}
+    host_name                       {{ ansible_hostname }}
+    service_description             {{ depends_on }}
+{{ nagios_extra(section.get('dependency', {})) }}
+}
+{% endif %}
+
+{%- endmacro %}
+{# # # #  File begins # # # #}
+# {{ ansible_managed }}
+
+
+#
+# Template for the basic system checks on {{ ansible_hostname }}
+#
+define service {
+    use                             service-{{ ansible_hostname }}
+    name                            service-basic-{{ ansible_hostname }}
+    register                        0
+    servicegroups                   basic_system
+
+{{ nagios_extra(nagios_service_basics_defaults) }}
+}
+
+#
+# Services Dependency Diagram (A <- B means "B depends on A")
+#
+# PING <- (All services in this configuration file)
+#
+
+{% set section = nrpe_monitor_ping %}
+#
+# PING Time
+#
+# Warning:  {{ section.rtt_warning }}ms RTA, {{ section.lost_warning * 100 }}% PL
+# Critical: {{ section.rtt_critical }}ms RTA, {{ section.lost_critical * 100 }}% PL
+#
+define service {
+    use                             service-basic-{{ ansible_hostname }}
+    host_name                       {{ ansible_hostname }}
+    service_description             PING
+    check_command                   check_ping!{{ section.rtt_warning }},{{ section.lost_warning * 100 }}%!{{ section.rtt_critical }},{{ section.lost_critical * 100 }}%
+{% if nagios_actions_enabled | bool and nagios_actions.ping_dashboard | default('') != '' %}
+    action_url                      {{ nagios_actions.ping_dashboard }}
+{% endif %}
+{{ nagios_extra(section.get('service', {})) }}
+}
+
+
+#
+# CPU Load
+#
+{{ service_definition(
+    "Current Load",
+    "PING",
+    "check_load",
+    nrpe_monitor_cpuload,
+    nagios_actions.cpuload_dashboard | default(''))
+}}
+
+#
+# Memory Usage
+#
+{{ service_definition(
+    "Memory Usage",
+    "PING",
+    "check_memory",
+    nrpe_monitor_freemem,
+    nagios_actions.freemem_dashboard | default(''))
+}}
+
+#
+# NTP Time
+#
+{{ service_definition(
+    "NTP Time",
+    "PING",
+    "check_ntp",
+    nrpe_monitor_ntp,
+    nagios_actions.ntp_dashboard | default(''))
+}}
+
+#
+# Zombie Processes
+#
+{{ service_definition(
+    "Zombie Processes",
+    "PING",
+    "check_zombie_procs",
+    nrpe_monitor_zombies,
+    nagios_actions.zombies_dashboard | default(''))
+}}
+
+#
+# Check TTY sessions
+#
+{{ service_definition(
+    "Check TTY sessions",
+    "PING",
+    "check_open_tty",
+    nrpe_monitor_tty,
+    nagios_actions.tty_dashboard | default(''))
+}}
+
+{% if nrpe_monitor_internal_dns.host | default('') != '' %}
+#
+# Internal DNS Resolution
+#
+{{ service_definition(
+    "DNS Resolution Internal",
+    "PING",
+    "check_dns_internal",
+    nrpe_monitor_internal_dns,
+    nagios_actions.internal_dns_dashboard | default(''))
+}}
+
+{% endif %}
+{% if nrpe_monitor_external_dns.host | default('') != '' %}
+#
+# External DNS Resolution
+#
+{{ service_definition(
+    "DNS Resolution External",
+    "PING",
+    "check_dns_external",
+    nrpe_monitor_external_dns,
+    nagios_actions.external_dns_dashboard | default(''))
+}}
+
+{% endif %}
+#
+# Syslog Service
+#
+{{ service_definition(
+    "Syslog Service",
+    "PING",
+    "check_syslog",
+    nrpe_monitor_syslog,
+    nagios_actions.syslog_dashboard | default(''))
+}}
+
+#
+# Free space on partitions
+#
+
+{% for item in ansible_mounts if item.fstype in local_fs %}
+# Partition {{ item.mount }}
+{{ service_definition(
+    "Space on Partition " + item.mount,
+    "PING",
+    "check_partition" + item.mount | replace( "/", "_" ),
+    nrpe_monitor_local_mounts,
+    nagios_actions.local_mounts_dashboard | default(''))
+}}
+{% endfor %}
+# Swap Partition
+{{ service_definition(
+    "Space on Swap Partition",
+    "PING",
+    "check_partition_swap",
+    nrpe_monitor_freeswap,
+    nagios_actions.freeswap_dashboard | default(''))
+}}
+
+#
+# Remote Mount Point Availability
+#
+
+{% for item in ansible_mounts if item.fstype not in local_fs %}
+# Remote mount {{ item.mount }}
+{{ service_definition(
+    "Remote Mount " + item.mount,
+    "PING",
+    "check_remote_mount" + item.mount | replace( "/", "_" ),
+    nrpe_monitor_remote_mounts,
+    nagios_actions.remote_mounts_dashboard | default(''))
+}}
+{% endfor %}
