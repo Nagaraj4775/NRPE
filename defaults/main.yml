@@ -143,13 +143,13 @@ nrpe_monitor_tty: {}
 
 nrpe_monitor_internal_dns:
   host:     www.amazon.com
-  timeout:  5.0
+  timeout:  5
   warning:  2.5
   critical: 5.0
 
 nrpe_monitor_external_dns:
   host:     www.amazon.com
-  timeout:  5.0
+  timeout:  5
   warning:  2.5
   critical: 5.0
 
