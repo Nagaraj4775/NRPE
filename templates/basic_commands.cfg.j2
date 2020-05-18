@@ -109,14 +109,4 @@ command[check_partition{{ item.mount | replace( "/", "_" ) }}]={{ nrpe_nagios_pa
 {% endfor %}
 
 
-### Not working as expected
-#{% for item in ansible_mounts if item.fstype not in local_fs %}
-#
-# Remote Mount Point {{ item.mount }} Check
-#
-#command[check_remote_mount{{ item.mount | replace( "/", "_" ) }}]={{ nrpe_nagios_path }}/check_remote_mount {{ item.mount }} '.'
-#{% endfor %}
-
-
-
 
