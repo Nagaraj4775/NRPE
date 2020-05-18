@@ -7,7 +7,7 @@
 
 #- name: Download Nagios Plugins
 #  command: wget -O "{{ download_dir }}/nagios-plugins-release-{{ nagios_plugins_version }}.tar.gz" "https://nagios-plugins.org/download/nagios-plugins-{{ nagios_plugins_version }}.tar.gz"
-- name: Get NRPE
+- name: Download Nagios Plugins
   get_url:
     url: "{{ pluginsurl }}"
     dest: "{{ download_dir }}/nagios-plugins-{{ nagios_plugins_version }}.tar.gz"
@@ -18,7 +18,7 @@
     dest: "{{ download_dir }}/"
     remote_src: true
 
-- name: Configure NRPE
+- name: Configure Nagios Plugins
   command: "./configure --with-nagios-user={{ nrpe_user }} --with-nagios-group={{ nrpe_group }}"
   args:
     chdir: "{{ download_dir }}/nagios-plugins-{{ nagios_plugins_version }}"
@@ -29,7 +29,7 @@
   args:
     chdir: "{{ download_dir }}/nagios-plugins-{{ nagios_plugins_version }}"
 
-- name: Make NRPE
+- name: Make NRPE for plugins
   command: make install
   args:
     chdir: "{{ download_dir }}/nagios-plugins-{{ nagios_plugins_version }}"
