@@ -15,11 +15,12 @@
 #command[check_load]=/usr/local/nagios/libexec/check_load $ARG1$
 #command[check_disk]=/usr/local/nagios/libexec/check_disk $ARG1$
 
-# {{ ansible_managed }}
+##############################
+#   {{ ansible_managed }}    #
+##############################
 
-#
 # CPU Load
-#
+
 # Warning:  {{ ansible_processor_count * nrpe_monitor_cpuload.warning[0] * 100.0 }}% < 1min, {{ ansible_processor_count * nrpe_monitor_cpuload.warning[1] * 100.0 }}% < 5min, {{ ansible_processor_count * nrpe_monitor_cpuload.warning[2] * 100.0 }}% < 15min
 # Critical: {{ ansible_processor_count * nrpe_monitor_cpuload.critical[0] * 100.0 }}% < 1min, {{ ansible_processor_count * nrpe_monitor_cpuload.critical[1] * 100.0 }}% < 5min, {{ ansible_processor_count * nrpe_monitor_cpuload.critical[2] * 100.0 }}% < 15min
 #

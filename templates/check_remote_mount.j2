@@ -1,0 +1,56 @@
+#!/bin/bash
+#
+# Improved mount points check
+# Requires the executable ./check_remote_mount-support
+#
+# Usage: check_remote_mount <mount_point> [<file_to_check> [<sudo_user>]]
+#
+# Fabrizio Colonna - <colofabrix@tin.it> - 15/06/2015
+#
+
+MOUNT_POINT="$1"
+FILE_TO_CHECK="${2:-nagios_mountcheck}"
+CHECK_USER="${3:-nagios}"
+CHECK_SUPPORT="{{ nrpe_nagios_path }}/check_remote_mount-support"
+
+#if [ "$(whoami)" != "$CHECK_USER" ]
+#then
+#    CHECK_SUPPORT="sudo -u $CHECK_USER $CHECK_SUPPORT"
+#fi
+
+wrong_usage() {
+    echo "UNKNOWN - Check script called with missing or wrong arguments"
+    exit 3
+}
+
+
+# Checking the parameters
+[[ -z "$MOUNT_POINT" || -z "$FILE_TO_CHECK" ]] && wrong_usage
+
+
+# Check the file system (the presence of a specific file in the mountpoint
+$CHECK_SUPPORT "$MOUNT_POINT/$FILE_TO_CHECK" 2> /dev/null
+EXT_CHECK="$?"
+
+# Check also the mount command to see if I didn't check a local file
+egrep -q "$MOUNT_POINT" /etc/mtab
+MOUNT_CHECK="$?"
+
+
+# Validate the return status and inform Nagios
+if [[ "$MOUNT_CHECK" != "0" ]]; then
+
+    echo "CRITICAL - The filesystem is NOT MOUNTED"
+    exit 2
+
+fi
+
+if [[ "$EXT_CHECK" != "0" ]]; then
+
+    echo "CRITICAL - The filesystem is mounted but NOT WORKING"
+    exit 2
+
+fi
+
+echo "OK - The filesystem is mounted and working"
+exit 0

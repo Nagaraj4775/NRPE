@@ -1,0 +1,41 @@
+#!/bin/bash
+#
+# Nagios plugin to check if there are TTY sessions in the machine  
+# Luis Montana <luis.montana@earthport.com> - 14/04/2016
+#
+
+# Return codes:
+STATE_OK=0
+STATE_WARNING=1
+STATE_CRITICAL=2
+STATE_UNKNOWN=3
+
+usage() {
+    echo "Usage: $0 [-w <ttl_count_warning>] "
+    exit $STATE_UNKNOWN
+}
+
+# Arguments:
+while getopts "w:" OPT; do
+    case $OPT in
+      w)  WARNLEVEL="$OPTARG"
+          ;;
+      *)  usage
+          ;;
+    esac
+done
+
+[ -z "$WARNLEVEL" ] usage
+
+# Get current tty sessions count:
+TTYCOUNT=$(ps axno user,tty | awk '$1 >= 1000 && $1 < 65530 && $2 != "?"' | egrep tty | wc -l)
+
+if [ $TTYCOUNT -lt $WARNLEVEL ]; then # less than $WARNLEVEL
+    echo "OK: $TTYCOUNT open TTY session(s)."
+    exit $STATE_OK
+fi
+
+if [ $TTYCOUNT -ge $WARNLEVEL ]; then # greater than or equal $WARNLEVEL 
+    echo "WARNING: $TTYCOUNT open TTY session(s)"
+    exit $STATE_WARNING
+fi
