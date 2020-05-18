@@ -14,7 +14,6 @@
   with_items:
    - { src: 'nrpe.cfg',  dest: "{{ nrpe_etc_path }}/nrpe.cfg", owner: "{{ nrpe_user }}", group: "{{ nrpe_group }}" }
    - { src: 'basic_commands.cfg', dest: "{{ nrpe_etc_path }}/basic.cfg",  owner: "{{ nrpe_user }}", group: "{{ nrpe_group }}" }
-   - { src: 'check_remote_mount', dest: "{{ nrpe_nagios_path }}/",  owner: "{{ nrpe_user }}", group: "{{ nrpe_group }}" }
   tags: nrpe
 
 - name: Add aditional plugins 
@@ -28,8 +27,6 @@
     seuser: system_u
     serole: object_r
     setype: nagios_unconfined_plugin_exec_t
-  notify:
-   - Reload NRPE
   tags: nrpe
 
 - name: Set allowed_hosts in nrpe.cfg

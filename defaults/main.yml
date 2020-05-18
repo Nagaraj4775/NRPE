@@ -21,7 +21,7 @@ nrpesrc: "nrpe-nrpe-{{ nrpe_version }}"
 nrpe_user: 'nagios'
 nrpe_group: 'nagios'
 nrpe_dont_blame:    '0'
-nrpe_allowed_hosts: "127.0.0.1,10.0.2.3"
+nrpe_allowed_hosts: "{{ (nagios_servers | map(attribute='address') | list + ['127.0.0.1']) | join(',') }}"
 
 #
 # General Variables
@@ -31,7 +31,7 @@ nrpe_allowed_hosts: "127.0.0.1,10.0.2.3"
 nagios_nrpe_enabled: false
 
 # List of Nagios servers
-nagios_servers: []
+nagios_servers: [10.28.128.50]
 
 # List the services to include when assigning groups to the host
 nagios_group_services: "{{ services }}"
