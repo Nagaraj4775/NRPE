@@ -34,6 +34,18 @@ command[check_load]={{ nrpe_nagios_path }}/check_load -w {{ ansible_processor_co
 #
 command[check_memory]={{ nrpe_nagios_path }}/check_mem.pl -w {{ nrpe_monitor_freemem.warning }} -c {{ nrpe_monitor_freemem.critical }} -f -C
 
+
+#check_dns_internal
+
+command[check_dns_internal]={{ nrpe_nagios_path }}/check_dns -H {{ nrpe_monitor_internal_dns.host }} -w 2.5 -c 5.0 -t 5.0
+
+#check_dns_external
+
+command[check_dns_external]={{ nrpe_nagios_path }}/check_dns -H {{ nrpe_monitor_external_dns.host }} -w 2.5 -c 5.0 -t 5.0
+
+#check_syslog
+
+
 {% if nrpe_monitor_ntp.servers != [] %}
 #
 # NTP Time
