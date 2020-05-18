@@ -35,7 +35,7 @@ nagios_nrpe_enabled: false
 nagios_servers: [10.28.128.50]
 
 # List the services to include when assigning groups to the host
-nagios_group_services: "int,centos_7,braham,stage_3,rabbitmq_servers"
+nagios_group_services: "int,centos_7"
 
 # User and group running Nagios on the server
 nagios_server_user: nagios
