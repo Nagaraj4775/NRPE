@@ -107,13 +107,15 @@ command[check_partition_var_log]={{ nrpe_nagios_path }}/check_disk -w {{ nrpe_mo
 #
 command[check_partition{{ item.mount | replace( "/", "_" ) }}]={{ nrpe_nagios_path }}/check_disk -w {{ nrpe_monitor_freeother.warning * 100 }}% -c {{ nrpe_monitor_freeother.critical * 100 }}% -p {{ item.mount }}
 {% endfor %}
-{% for item in ansible_mounts if item.fstype not in local_fs %}
 
+
+### Not working as expected
+#{% for item in ansible_mounts if item.fstype not in local_fs %}
 #
 # Remote Mount Point {{ item.mount }} Check
 #
-command[check_remote_mount{{ item.mount | replace( "/", "_" ) }}]={{ nrpe_nagios_path }}/check_remote_mount {{ item.mount }} '.'
-{% endfor %}
+#command[check_remote_mount{{ item.mount | replace( "/", "_" ) }}]={{ nrpe_nagios_path }}/check_remote_mount {{ item.mount }} '.'
+#{% endfor %}
 
 
 

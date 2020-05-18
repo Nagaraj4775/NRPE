@@ -14,6 +14,7 @@
   with_items:
    - { src: 'nrpe.cfg',  dest: "{{ nrpe_etc_path }}/nrpe.cfg", owner: "{{ nrpe_user }}", group: "{{ nrpe_group }}" }
    - { src: 'basic_commands.cfg', dest: "{{ nrpe_etc_path }}/basic.cfg",  owner: "{{ nrpe_user }}", group: "{{ nrpe_group }}" }
+  notify: restart nrpe 
   tags: nrpe
 
 - name: Add aditional plugins 
