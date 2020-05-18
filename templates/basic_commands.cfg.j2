@@ -37,11 +37,11 @@ command[check_memory]={{ nrpe_nagios_path }}/check_mem.pl -w {{ nrpe_monitor_fre
 
 #check_dns_internal
 
-command[check_dns_internal]={{ nrpe_nagios_path }}/check_dns -H {{ nrpe_monitor_internal_dns.host }} -w 2.5 -c 5.0 -t 5.0
+command[check_dns_internal]={{ nrpe_nagios_path }}/check_dns -H {{ nrpe_monitor_internal_dns.host }} -w 2.5 -c 5.0 -t 5
 
 #check_dns_external
 
-command[check_dns_external]={{ nrpe_nagios_path }}/check_dns -H {{ nrpe_monitor_external_dns.host }} -w 2.5 -c 5.0 -t 5.0
+command[check_dns_external]={{ nrpe_nagios_path }}/check_dns -H {{ nrpe_monitor_external_dns.host }} -w 2.5 -c 5.0 -t 5
 
 #check_syslog
 
