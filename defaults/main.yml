@@ -18,8 +18,8 @@ nrpesrc: "nrpe-nrpe-{{ nrpe_version }}"
 
 # Determines if the NRPE daemon will allow clients to specify arguments to commands that are executed. Change to 1 to enable
 
-nrpe_user: 'nrpe'
-nrpe_group: 'nrpe'
+nrpe_user: 'nagios'
+nrpe_group: 'nagios'
 nrpe_dont_blame:    '1'
 nrpe_allowed_hosts: 
   - 127.0.0.1

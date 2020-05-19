@@ -65,3 +65,4 @@ command[check_partition_boot]={{ nrpe_nagios_path }}/check_disk -w {{ nrpe_monit
 
 command[check_partition_var_log]={{ nrpe_nagios_path }}/check_disk -w {{ nrpe_monitor_freevarlog.warning * 100 }}% -c {{ nrpe_monitor_freevarlog.critical * 100 }}% -p /var/log
 
+command[check_docker]=sudo /usr/local/nagios/libexec/check_docker.py $ARG1$

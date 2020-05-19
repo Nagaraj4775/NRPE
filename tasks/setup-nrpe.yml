@@ -27,7 +27,7 @@
     mode:   '0755'
     seuser: system_u
     serole: object_r
-    setype: nagios_unconfined_plugin_exec_t
+    setype: nrpe_etc_t
   notify: restart nrpe 
   tags: nrpe
 
