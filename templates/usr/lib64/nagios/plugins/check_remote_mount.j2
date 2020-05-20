@@ -11,7 +11,7 @@
 MOUNT_POINT="$1"
 FILE_TO_CHECK="${2:-nagios_mountcheck}"
 CHECK_USER="${3:-nagios}"
-CHECK_SUPPORT="/usr/local/nagios/libexec/check_remote_mount-support"
+CHECK_SUPPORT="{{ nrpe_nagios_path }}/plugins/check_remote_mount-support"
 
 #if [ "$(whoami)" != "$CHECK_USER" ]
 #then

@@ -1,17 +1,107 @@
 ---
+# # # # #  NRPE  # # # # #
 
-# tasks file for nagios
+- name: "Include OS-Specific Variables"
+  include_vars: "vars_{{ ansible_distribution | lower }}_{{ ansible_distribution_major_version }}.yml"
+  tags: nrpe
 
-- include: load-variables.yml
+- name: "Gather Facts"
+  setup:
+  tags: nrpe
 
-- include: setup-prerequisites.yml
+- name: "Install Dependencies"
+  package: name="{{ item }}" state=present
+  with_items:
+   - "{{ nrpe_depencencies }}"
+  tags: nrpe
 
-- include: setup-users.yml
+- name: "Install Optional Dependencies"
+  package: name="{{ item.package }}" state=present
+  when: item.enabled
+  with_items:
+   - "{{ nrpe_optional_depencencies }}"
+  tags: nrpe
 
-- include: build-nrpe.yml
+- name: "Install Packages"
+  package: name="{{ item }}" state=present
+  with_items:
+   - nrpe
+   - nagios-plugins-all
+  tags: nrpe
 
-- include: nagios-plugins.yml
+- name: "Configuration Files"
+  template:
+    src:    "{{ item.src }}.j2"
+    dest:   "{{ item.dest }}"
+    force:  yes
+    owner:  "{{ item.owner }}"
+    group:  "{{ item.group }}"
+    mode:   '0644'
+    seuser: system_u
+    serole: object_r
+    setype: nrpe_etc_t
+  with_items:
+   - { src: 'etc/nagios/nrpe.cfg',  dest: "{{ nagios_etc_path }}/nrpe.cfg", owner: root,                       group: root }
+   - { src: 'etc/nrpe.d/basic.cfg', dest: "{{ nrpe_etc_path }}/basic.cfg",  owner: "{{ nagios_server_user }}", group: "{{ nagios_server_group }}" }
+  notify:
+   - Reload NRPE
+  tags: nrpe
 
-- include: setup-nrpe.yml
+- name: "Custom Scripts"
+  copy:
+    src:    usr/lib64/nagios/plugins/
+    dest:   "{{ nrpe_nagios_path }}/plugins/"
+    force:  yes
+    owner:  root
+    group:  root
+    mode:   '0755'
+    seuser: system_u
+    serole: object_r
+    setype: nagios_unconfined_plugin_exec_t
+  notify:
+   - Reload NRPE
+  tags: nrpe
 
-#- include: server-conf.yml
+- name: "Custom Scripts check remote mount"
+  template:
+    src:    usr/lib64/nagios/plugins/check_remote_mount.j2
+    dest:   "{{ nrpe_nagios_path }}/plugins/check_remote_mount"
+    force:  yes
+    owner:  root
+    group:  root
+    mode:   '0755'
+    seuser: system_u
+    serole: object_r
+    setype: nagios_unconfined_plugin_exec_t
+  notify:
+   - Reload NRPE
+  tags: nrpe
+
+- name: "Enable NRPE"
+  include: nrpe_enabled.yml
+  when: nagios_nrpe_enabled | bool
+  tags: nrpe
+
+- name: "Disable NRPE"
+  include: nrpe_disabled.yml
+  when: not nagios_nrpe_enabled | bool
+  tags: nrpe
+
+- name: "Assemble Nagios Configuration"
+  delegate_to: "{{ item.0.name }}"
+  assemble:
+    src:    "{{ nagios_objects_path }}/ansible-shards/"
+    dest:   "{{ nagios_objects_path }}/{{ item.1.dest }}"
+    regexp: "{{ item.1.regexp }}"
+    mode:   '0644'
+    owner:   "{{ nagios_server_user }}"
+    group:   "{{ nagios_server_group }}"
+    seuser:  system_u
+    serole:  object_r
+    setype:  etc_t
+  with_nested:
+   - "{{ nagios_servers | default( [] ) }}"
+   - - { regexp: '\d+-groups-basic.*\.cfg', dest: groups/basic.cfg }
+  notify:
+   - Reload Nagios
+  tags: nrpe

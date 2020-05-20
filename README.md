@@ -1,65 +1,85 @@
-# nrpe-client
+Role Name
+=========
 
-This role installs the NRPE client on a monitoring server.
+Configures a specific client to be checked by Nagios.
 
-## Requirements
+The roles installs and configure NRPE on the local hosts and the relevant configuration on the Nagios servers
 
-None.
 
-## Role Variables
+Defined Variables
+-----------------
 
-### Default usage
+Variables that are defined in this role
 
-For default usage of this role you only need to define the following, for more advanced usage look at the [Advanced usage](#advanced-usage) section:
-```yaml
-# Sets the hosts allowed to connect to NRPE
-nrpe_allowed_hosts:
-  - 127.0.0.1
-```
+| Variable                   | Default   | Description                                                    |
+| :---                       | :---      | :---                                                           |
+| `nagios_nrpe_enabled`      | false     | Enable NRPE to accept incoming requests.                       |
+| `nagios_sms_alerts`        | false     | If true will set Nagios to send alerts via SMS.                |
+| `nagios_critical_host`     | false     | If true Nagio will setup the host as Critical.                 |
 
-### Advanced usage
 
-For more advanced usage the following variables are available:
-```yaml
-# The directory where the downloaded files will be placed and extracted.
-download_dir: "{{ ansible_env.HOME }}/nrpe"
+Managed Variables
+-----------------
 
-# The version of NRPE to be installed
-nrpe_version: 4.0.2
+Variables that are created manipulating existing values. This variables should not be
+modified unsless you know what you are doing.
 
-# The NRPE download url
-nrpeurl: "https://github.com/NagiosEnterprises/nrpe/archive/nrpe-{{ nrpe_version }}.tar.gz"
+| Variable                   | Default                                    | Description                                                  |
+| :---                       | :---                                       | :---                                                         |
 
-# The name of the untarred NRPE directory
-nrpesrc: "nrpe-nrpe-{{ nrpe_version }}"
 
-# The user which the NRPE daemon runs as
-nrpe_user: nagios
+Encrypted Variables
+-------------------
 
-# The group which the NRPE daemon runs as
-nrpe_group: nagios
+Variables that must be kept encrypted
 
-# Determines if the NRPE daemon will allow clients to specify arguments to commands that are executed. Change to 1 to enable
-nrpe_dont_blame_nrpe: 0
-```
+| Variable                    | Description                                          |
+| :---                        | :---                                                 |
 
-## Dependencies
 
-This role doesn't have any strict dependencies but can be used with [wilmardo/nagios](https://galaxy.ansible.com/wilmardo/nagios/).
+Used Variables
+--------------
 
-## Example Playbook
+Variables that are defined outside the role and used by it
 
-Install NRPE and setup the allowed_hosts.
-It is better to move the `nrpe_allowed_hosts` to host_vars of your project but this will work.
-```yaml
-- hosts: monitoring-servers
-  roles:
-     - { role: nrpe-client, nrpe_allowed_hosts [ 127.0.0.1, 192.168.1.100 ] }
-```
+| Variable          | Description                                        |
+| :---              | :---                                               |
 
-## License
 
-BSD-3-Clause-Clear
+Target Groups
+-------------
 
-## Author Information
+Groups that the role will use to configure the system. These are defined in the inventories.
 
+| Group          | Description                                                  |
+| :---           | :---                                                         |
+| `nagios`       | The Nagios servers that will check the machine.              |
+
+
+Role Tags
+--------------
+
+| Tag          | Description                                  |
+| :---         | :---                                         |
+
+
+Dependencies
+------------
+
+No dependencies.
+
+
+Example Playbook
+----------------
+
+
+TODO
+------------
+
+List of things to be done.
+
+
+Known Bugs
+------------
+
+List of known bugs.

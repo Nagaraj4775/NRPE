@@ -1,29 +1,5 @@
 ---
 
-# Sets the hosts allowed to connect to NRPE
-
-
-# The directory where the downloaded files will be placed and extracted.
-download_dir: "{{ ansible_env.HOME }}/nrpe"
-
-# The version of NRPE to be installed
-nrpe_version: 4.0.2
-nagios_plugins_version: 2.3.3
-
-# The NRPE download url
-nrpeurl: "https://github.com/NagiosEnterprises/nrpe/archive/nrpe-{{ nrpe_version }}.tar.gz"
-pluginsurl: https://github.com/nagios-plugins/nagios-plugins/releases/download/release-{{ nagios_plugins_version }}/nagios-plugins-{{ nagios_plugins_version }}.tar.gz
-# The name of the untarred NRPE directory
-nrpesrc: "nrpe-nrpe-{{ nrpe_version }}"
-
-# Determines if the NRPE daemon will allow clients to specify arguments to commands that are executed. Change to 1 to enable
-
-nrpe_user: 'nagios'
-nrpe_group: 'nagios'
-nrpe_dont_blame:    '1'
-nrpe_allowed_hosts: 
-  - 127.0.0.1
-  - 10.28.128.50
 #
 # General Variables
 #
@@ -32,10 +8,10 @@ nrpe_allowed_hosts:
 nagios_nrpe_enabled: false
 
 # List of Nagios servers
-nagios_servers: [10.28.128.50]
+nagios_servers: []
 
 # List the services to include when assigning groups to the host
-nagios_group_services: "int,centos_7,braham,stage_3,rabbitmq_servers"
+nagios_group_services: "{{ services }}"
 
 # User and group running Nagios on the server
 nagios_server_user: nagios
@@ -43,20 +19,37 @@ nagios_server_group: nagios
 
 # Nagios directories shortcuts
 nagios_home_path:     /usr/local/nagios
-nagios_etc_path:      "{{ nagios_home_path }}/etc"
+nagios_etc_path:      /etc/nagios
 nagios_objects_path:  "{{ nagios_etc_path }}/objects"
 nagios_host_path:     "{{ nagios_objects_path }}/hosts/{{ ansible_hostname }}"
 nagios_services_path: "{{ nagios_objects_path }}/services"
 nagios_groups_path:   "{{ nagios_objects_path }}/groups"
 
-# nrpe directories
-
-nrpe_etc_path: "/usr/local/nagios/etc"
-nrpe_nagios_path: "{{ nagios_home_path }}/libexec"
 #
 # Additional components
 #
 nrpe_postgres_enabled: false
+
+
+#
+# NRPE Configuration File - See nrpe.cfg
+#
+
+nrpe_log_facility:       'daemon'
+nrpe_pid_file:           '/var/run/nrpe/nrpe.pid'
+nrpe_server_port:        '5666'
+nrpe_server_address:     "{{ ansible_default_ipv4.address }}"
+nrpe_nrpe_user:          'nrpe'
+nrpe_nrpe_group:         'nrpe'
+nrpe_allowed_hosts:      "{{ (nagios_servers | map(attribute='address') | list + ['127.0.0.1']) | join(',') }}"
+nrpe_dont_blame_nrpe:    '0'
+nrpe_command_prefix:     ''
+nrpe_debug:              '0'
+nrpe_command_timeout:    '60'
+nrpe_connection_timeout: '300'
+nrpe_commands:           []
+nrpe_allow_weak_random_seed: '1'
+nrpe_allow_bash_command_substitution: '0'
 
 
 #
@@ -143,13 +136,13 @@ nrpe_monitor_tty: {}
 
 nrpe_monitor_internal_dns:
   host:     www.amazon.com
-  timeout:  5
+  timeout:  5.0
   warning:  2.5
   critical: 5.0
 
 nrpe_monitor_external_dns:
   host:     www.amazon.com
-  timeout:  5
+  timeout:  5.0
   warning:  2.5
   critical: 5.0
 

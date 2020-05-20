@@ -1,0 +1,14 @@
+---
+
+- name: "Stop NRPE"
+  service: name="{{ nrpe_daemon_name }}" state=stopped enabled=no
+
+- name: "Remove Host Directory on Nagios Server"
+  delegate_to: "{{ item.name }}"
+  file:
+    path:  "{{ nagios_host_path }}"
+    state: absent
+  with_items:
+   - "{{ nagios_servers | default([]) }}"
+  notify:
+   - Reload Nagios

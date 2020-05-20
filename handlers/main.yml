@@ -1,5 +1,12 @@
 ---
-- name: restart nrpe
-  service:
-    name: nrpe
-    state: restarted
+# handlers file for nrpe-basic
+
+- name: "Reload NRPE"
+  service: name="{{ nrpe_daemon_name }}" state=restarted
+  when: nagios_nrpe_enabled | bool
+
+- name: "Reload Nagios"
+  delegate_to: "{{ item.name }}"
+  service: name=nagios state=reloaded
+  with_items:
+   - "{{ nagios_servers | default( [] ) }}"

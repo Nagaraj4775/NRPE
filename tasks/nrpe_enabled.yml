@@ -1,0 +1,42 @@
+---
+
+- name: "Start NRPE"
+  service: name="{{ nrpe_daemon_name }}" state=started enabled=yes
+
+- name: "Create Host Directory on Nagios Server"
+  delegate_to: "{{ item.name }}"
+  file:
+    path:   "{{ nagios_host_path }}"
+    state:  directory
+    force:  yes
+    owner:  "{{ nagios_server_user }}"
+    group:  "{{ nagios_server_group }}"
+    mode:   '0755'
+    seuser: system_u
+    serole: object_r
+    setype: nrpe_etc_t
+  with_items:
+   - "{{ nagios_servers | default( [] ) }}"
+  notify:
+   - Reload Nagios
+
+- name: "Service Definitions on Nagios Server"
+  delegate_to: "{{ item.0.name }}"
+  template:
+    src:    "etc/nagios/objects/{{ item.1.src }}.j2"
+    dest:   "{{ nagios_objects_path }}/{{ item.1.dest }}"
+    force:  yes
+    owner:  "{{ nagios_server_user }}"
+    group:  "{{ nagios_server_group }}"
+    mode:   '0644'
+    seuser: system_u
+    serole: object_r
+    setype: nrpe_etc_t
+  with_nested:
+   - "{{ nagios_servers | default([]) }}"
+   - - { src: groups/basic.cfg,         dest: "ansible-shards/0-groups-basic.cfg" }
+     - { src: hosts/templates.cfg,      dest: "hosts/{{ ansible_hostname }}/templates.cfg" }
+     - { src: hosts/host.cfg,           dest: "hosts/{{ ansible_hostname }}/host.cfg" }
+     - { src: hosts/service-basics.cfg, dest: "hosts/{{ ansible_hostname }}/service-basics.cfg" }
+  notify:
+   - Reload Nagios
